@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+  <h1>📝 Tasks</h1>
+
+  <form id="new-task-form" style="margin: 1rem 0;">
+    <input id="title" type="text" placeholder="New task title" required />
+    <button type="submit">Add</button>
+  </form>
+
+  <ul id="task-list" style="list-style: none; padding: 0;">
+    {% for t in items %}
+      <li data-id="{{ t.id }}" style="margin: .4rem 0;">
+        <input type="checkbox" class="toggle" {% if t.done %}checked{% endif %} />
+        <span class="title"> 
+             {% if t.done %}<s><a href="{{ url_for('task_detail', task_id=t.id) }}">{{ t.title }}</a></s>
+              {% else %}<a href="{{ url_for('task_detail', task_id=t.id) }}">{{ t.title }}</a>{% endif %}
+            </span>
+        <button class="del" style="margin-left:.5rem;">Delete</button>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <script>
+    const list = document.getElementById('task-list');
+    document.getElementById('new-task-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      if (!title) return;
+      const r = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({title})
+      });
+      if (!r.ok) { alert('Failed to add'); return; }
+      location.reload();
+    });
+
+    list.addEventListener('click', async (e) => {
+      const li = e.target.closest('li');
+      if (!li) return;
+      const id = li.getAttribute('data-id');
+
+      if (e.target.classList.contains('toggle')) {
+        await fetch(`/api/tasks/${id}/toggle`, {method: 'PATCH'});
+        location.reload();
+      }
+      if (e.target.classList.contains('del')) {
+        if (confirm('Delete this task?')) {
+          await fetch(`/api/tasks/${id}`, {method: 'DELETE'});
+          location.reload();
+        }
+      }
+    });
+  </script>
+{% endblock %}

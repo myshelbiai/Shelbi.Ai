@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Task {{ task.id }}{% endblock %}
+{% block content %}
+  <h1>📝 Task #{{ task.id }}</h1>
+
+  <p><strong>Title:</strong> {{ task.title }}</p>
+  <p><strong>Status:</strong> {{ 'Done ✅' if task.done else 'Open ⭕' }}</p>
+  <p><strong>Created:</strong> {{ task.created_at or '—' }}</p>
+
+  {% if task.photo_path %}
+    <div style="margin:1rem 0;">
+      <strong>Photo:</strong><br>
+      <img src="{{ url_for('static', filename=task.photo_path) }}" alt="Task photo" style="max-width:400px;border:1px solid #ddd;">
+    </div>
+  {% endif %}
+
+  <hr/>
+
+  <h2>Upload/Replace Photo</h2>
+  <form method="post" action="{{ url_for('task_upload', task_id=task.id) }}" enctype="multipart/form-data" style="margin-bottom:1rem;">
+    <input type="file" name="photo" accept=".png,.jpg,.jpeg,.gif,.webp" required>
+    <button type="submit">Upload</button>
+  </form>
+
+  <h2>Edit</h2>
+  <form method="post" action="{{ url_for('task_edit', task_id=task.id) }}" style="display:grid;gap:.6rem;max-width:420px;">
+    <label>
+      Title<br/>
+      <input name="title" type="text" value="{{ task.title }}" style="width:100%;padding:.4rem .5rem;">
+    </label>
+    <label style="display:flex;align-items:center;gap:.5rem;">
+      <input name="done" type="checkbox" {% if task.done %}checked{% endif %}> Done
+    </label>
+    <div style="display:flex;gap:.5rem;">
+      <button type="submit">Save</button>
+      <a href="{{ url_for('tasks_ui') }}" style="padding:.5rem .7rem;border:1px solid #ddd;text-decoration:none;">Back</a>
+    </div>
+  </form>
+
+  <form method="post" action="{{ url_for('task_delete_html', task_id=task.id) }}" onsubmit="return confirm('Delete this task?')" style="margin-top:1rem;">
+    <button type="submit">Delete Task</button>
+  </form>
+{% endblock %}
