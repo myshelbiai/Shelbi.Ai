@@ -10,6 +10,22 @@
     Today
   </a>
 </h1>
+<div style="margin:.5rem 0;">
+  <form method="get" style="display:flex; gap:.5rem; align-items:center;">
+    <label>Month
+      <select name="m">
+        {% for mnum in range(1,13) %}
+          <option value="{{ mnum }}" {% if mnum == month %}selected{% endif %}>{{ mnum }} - {{ ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mnum] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Year
+      <input type="number" name="y" value="{{ year }}" style="width:6rem;">
+    </label>
+    <button type="submit">Go</button>
+    <a href="{{ url_for('calendar.index', y=today.year, m=today.month) }}" style="margin-left:.5rem;">Today</a>
+  </form>
+</div>
 
 
   <table style="border-collapse:collapse;width:100%;max-width:700px;">

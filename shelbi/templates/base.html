@@ -9,12 +9,21 @@
 <body>
   <header class="nav">
     <a href="{{ url_for('home') }}">Shelbi</a>
-    <nav>
-      <a href="{{ url_for('home') }}">Home</a>
-      <a href="{{ url_for('tasks_ui') }}">Tasks</a>
-      <a href="{{ url_for('calendar.index') }}">Calendar</a>
-      <a href="{{ url_for('health') }}">Health</a>
-    </nav>
+{% set ep = request.endpoint or '' %}
+<nav>
+  <a href="{{ url_for('home') }}"
+     class="{{ 'active' if ep == 'home' else '' }}">Home</a>
+
+  <a href="{{ url_for('tasks_ui') }}"
+     class="{{ 'active' if ep == 'tasks_ui' or ep.startswith('task_') else '' }}">Tasks</a>
+
+  <a href="{{ url_for('calendar.index') }}"
+     class="{{ 'active' if ep.startswith('calendar.') else '' }}">Calendar</a>
+
+  <a href="{{ url_for('health') }}"
+     class="{{ 'active' if ep == 'health' else '' }}">Health</a>
+</nav>
+
   </header>
 
   <main class="container">

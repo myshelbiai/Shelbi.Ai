@@ -3,8 +3,9 @@
 {% block content %}
   <h1>📝 Tasks</h1>
 
-  <form id="new-task-form" style="margin: 1rem 0;">
+  <form id="new-task-form" style="margin: 1rem 0; display:flex; gap:.5rem; flex-wrap:wrap;">
     <input id="title" type="text" placeholder="New task title" required />
+    <input id="due" type="date" />
     <button type="submit">Add</button>
   </form>
 
@@ -12,10 +13,20 @@
     {% for t in items %}
       <li data-id="{{ t.id }}" style="margin: .4rem 0;">
         <input type="checkbox" class="toggle" {% if t.done %}checked{% endif %} />
-        <span class="title"> 
-             {% if t.done %}<s><a href="{{ url_for('task_detail', task_id=t.id) }}">{{ t.title }}</a></s>
-              {% else %}<a href="{{ url_for('task_detail', task_id=t.id) }}">{{ t.title }}</a>{% endif %}
-            </span>
+        <span class="title">
+          {% if t.done %}
+            <s><a href="{{ url_for('task_detail', task_id=t.id) }}">{{ t.title }}</a></s>
+          {% else %}
+            <a href="{{ url_for('task_detail', task_id=t.id) }}">{{ t.title }}</a>
+          {% endif %}
+        </span>
+        {% if t.due_date %}
+          <small style="margin-left:.5rem; opacity:.7;">(due {{ t.due_date }})</small>
+        {% endif %}
+        {% if t.photo_path %}
+          <img src="{{ url_for('static', filename=t.photo_path) }}" alt="task photo"
+               style="height:24px; vertical-align:middle; margin-left:.5rem; border:1px solid #ddd;">
+        {% endif %}
         <button class="del" style="margin-left:.5rem;">Delete</button>
       </li>
     {% endfor %}
@@ -23,14 +34,17 @@
 
   <script>
     const list = document.getElementById('task-list');
+
     document.getElementById('new-task-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = document.getElementById('title').value.trim();
+      const due = document.getElementById('due').value; // yyyy-mm-dd or ""
       if (!title) return;
+
       const r = await fetch('/api/tasks', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({title})
+        body: JSON.stringify({ title, due_date: due || null })
       });
       if (!r.ok) { alert('Failed to add'); return; }
       location.reload();
@@ -42,12 +56,12 @@
       const id = li.getAttribute('data-id');
 
       if (e.target.classList.contains('toggle')) {
-        await fetch(`/api/tasks/${id}/toggle`, {method: 'PATCH'});
+        await fetch(`/api/tasks/${id}/toggle`, { method: 'PATCH' });
         location.reload();
       }
       if (e.target.classList.contains('del')) {
         if (confirm('Delete this task?')) {
-          await fetch(`/api/tasks/${id}`, {method: 'DELETE'});
+          await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
           location.reload();
         }
       }
